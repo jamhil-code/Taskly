@@ -10,6 +10,9 @@
 
 <body>
 
+<!-- --------------------------------------------------
+     TOP BAR (SMALL BUBBLE LOGO)
+-------------------------------------------------- -->
 <div class="topbar">
   <div class="logo-small-bubble"></div>
   <div class="topbar-title">Taskly</div>
@@ -18,8 +21,14 @@
   </button>
 </div>
 
-<!-- HOME -->
+<!-- --------------------------------------------------
+     SCREENS (TRUE MOBILE APP NAVIGATION)
+-------------------------------------------------- -->
+
+<!-- HOME SCREEN -->
 <div id="screen-home" class="screen active">
+
+  <!-- HERO BUBBLE -->
   <div class="hero-logo-wrapper">
     <div class="hero-bubble"></div>
   </div>
@@ -27,32 +36,9 @@
   <h2 class="welcome-title">Welcome back!</h2>
   <p class="welcome-sub">Lend a hand and make a difference today.</p>
 
+  <!-- SEARCH BAR -->
   <div class="search-bar">
-    <input list="locationList" id="homeLocation" placeholder="Location">
-
-    <datalist id="locationList">
-      <option>Ottawa</option>
-      <option>Toronto</option>
-      <option>Vancouver</option>
-      <option>Montreal</option>
-      <option>Calgary</option>
-      <option>United States</option>
-      <option>Canada</option>
-      <option>Mexico</option>
-      <option>United Kingdom</option>
-      <option>France</option>
-      <option>Germany</option>
-      <option>Australia</option>
-      <option>Japan</option>
-      <option>China</option>
-      <option>Brazil</option>
-      <option>India</option>
-      <option>South Korea</option>
-      <option>Italy</option>
-      <option>Spain</option>
-      <option>Netherlands</option>
-    </datalist>
-
+    <input id="homeLocation" placeholder="Location">
     <select id="homeCategory">
       <option>All Categories</option>
       <option>Yard Work</option>
@@ -60,10 +46,10 @@
       <option>Errands</option>
       <option>Pet Care</option>
     </select>
-
     <button class="btn primary" onclick="navigateTo('search')">Search</button>
   </div>
 
+  <!-- CATEGORY ICONS -->
   <div class="category-row">
     <div class="cat-item" onclick="quickCategory('yard')">🌿 Yard Work</div>
     <div class="cat-item" onclick="quickCategory('tech')">💻 Tech Help</div>
@@ -71,9 +57,11 @@
     <div class="cat-item" onclick="quickCategory('pet')">🐶 Pet Care</div>
   </div>
 
+  <!-- POPULAR TASKS -->
   <h3 class="section-title">Popular Tasks for You</h3>
   <div id="homePopular" class="task-grid"></div>
 
+  <!-- HOURS BANNER -->
   <div class="hours-banner">
     <h3>Track Your Volunteer Hours & Earn Rewards!</h3>
     <p>Build your resume for the future.</p>
@@ -81,15 +69,15 @@
   </div>
 </div>
 
-<!-- SEARCH -->
+<!-- SEARCH SCREEN -->
 <div id="screen-search" class="screen">
   <h2>Search Tasks</h2>
   <input id="searchInput" placeholder="Search…" oninput="liveSearch()">
   <p id="searchStatus" class="muted"></p>
-  <div id="searchResults" class="task-grid"></div>
+  <div id="searchResults"></div>
 </div>
 
-<!-- MESSAGES -->
+<!-- MESSAGES SCREEN -->
 <div id="screen-messages" class="screen">
   <h2>Messages</h2>
   <div id="chat" class="chat-box"></div>
@@ -100,14 +88,16 @@
   </div>
 </div>
 
-<!-- HOURS -->
+<!-- HOURS SCREEN -->
 <div id="screen-hours" class="screen">
   <h2>Your Volunteer Hours</h2>
+
   <div id="hoursList"></div>
+
   <button class="btn primary" onclick="exportVolunteerHours()">Export Hours</button>
 </div>
 
-<!-- PROFILE -->
+<!-- PROFILE SCREEN -->
 <div id="screen-profile" class="screen">
   <h2>Your Profile</h2>
 
@@ -133,7 +123,7 @@
   <button class="btn primary" onclick="saveSettings()">Save</button>
 </div>
 
-<!-- TASK DETAILS -->
+<!-- TASK DETAILS SCREEN -->
 <div id="screen-task" class="screen">
   <button class="btn secondary" onclick="navigateBack()">Back</button>
 
@@ -149,6 +139,9 @@
   <p><strong>Time:</strong> <span id="tdTime"></span></p>
 </div>
 
+<!-- --------------------------------------------------
+     BOTTOM NAVIGATION BAR
+-------------------------------------------------- -->
 <div class="bottom-nav">
   <div onclick="navigateTo('home')">🏠<span>Home</span></div>
   <div onclick="navigateTo('search')">🔍<span>Search</span></div>
