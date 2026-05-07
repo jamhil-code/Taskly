@@ -1,3 +1,6 @@
+/* --------------------------------------------------
+   RESET & BASE
+-------------------------------------------------- */
 * {
   margin: 0;
   padding: 0;
@@ -5,10 +8,11 @@
 }
 
 body {
-  font-family: system-ui, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   background: #f5f6ff;
   color: #222;
-  padding-bottom: 80px;
+  line-height: 1.5;
+  padding-bottom: 80px; /* space for bottom nav */
 }
 
 .muted {
@@ -16,7 +20,9 @@ body {
   font-size: 14px;
 }
 
-/* TOPBAR */
+/* --------------------------------------------------
+   TOP BAR
+-------------------------------------------------- */
 .topbar {
   position: sticky;
   top: 0;
@@ -26,7 +32,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
-  background: rgba(255,255,255,0.9);
+  background: rgba(255,255,255,0.85);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(0,0,0,0.05);
 }
@@ -36,6 +42,7 @@ body {
   font-size: 18px;
 }
 
+/* small bubble logo */
 .logo-small-bubble {
   width: 32px;
   height: 32px;
@@ -43,6 +50,7 @@ body {
   background: radial-gradient(circle at 30% 30%, #e8caff, #b47aff);
   box-shadow: 0 0 10px rgba(180,122,255,0.7);
   position: relative;
+  overflow: hidden;
 }
 
 .logo-small-bubble::after {
@@ -61,21 +69,24 @@ body {
   border: none;
   background: transparent;
   cursor: pointer;
+  padding: 6px;
 }
 
-/* SCREENS */
+/* --------------------------------------------------
+   SCREENS
+-------------------------------------------------- */
 .screen {
   display: none;
   padding: 16px;
-  max-width: 1100px;
-  margin: 0 auto;
 }
 
 .screen.active {
   display: block;
 }
 
-/* HERO */
+/* --------------------------------------------------
+   HERO BUBBLE (HOME)
+-------------------------------------------------- */
 .hero-logo-wrapper {
   display: flex;
   justify-content: center;
@@ -89,7 +100,20 @@ body {
   border-radius: 50%;
   background: radial-gradient(circle at 30% 30%, #f0d9ff, #b47aff);
   box-shadow: 0 0 24px rgba(180,122,255,0.7);
+  position: relative;
   animation: floatBubble 4s ease-in-out infinite;
+}
+
+.hero-bubble::after {
+  content: "";
+  position: absolute;
+  top: 18px;
+  left: 26px;
+  width: 32px;
+  height: 32px;
+  background: rgba(255,255,255,0.7);
+  border-radius: 50%;
+  filter: blur(8px);
 }
 
 @keyframes floatBubble {
@@ -98,6 +122,9 @@ body {
   100% { transform: translateY(0); }
 }
 
+/* --------------------------------------------------
+   HOME TEXT
+-------------------------------------------------- */
 .welcome-title {
   font-size: 22px;
   font-weight: 700;
@@ -110,7 +137,9 @@ body {
   margin-bottom: 16px;
 }
 
-/* BUTTONS */
+/* --------------------------------------------------
+   BUTTONS
+-------------------------------------------------- */
 .btn {
   border: none;
   border-radius: 12px;
@@ -130,13 +159,10 @@ body {
   background: #7a3be8;
 }
 
-.btn.secondary {
-  background: #eee;
-  color: #333;
-}
-
-/* INPUTS */
-input, select {
+/* --------------------------------------------------
+   INPUTS
+-------------------------------------------------- */
+input, select, textarea {
   width: 100%;
   padding: 10px 12px;
   border-radius: 10px;
@@ -144,7 +170,9 @@ input, select {
   font-size: 14px;
 }
 
-/* SEARCH BAR */
+/* --------------------------------------------------
+   SEARCH BAR (HOME)
+-------------------------------------------------- */
 .search-bar {
   display: grid;
   grid-template-columns: 1.2fr 1.2fr auto;
@@ -152,7 +180,9 @@ input, select {
   margin-bottom: 16px;
 }
 
-/* CATEGORY ROW */
+/* --------------------------------------------------
+   CATEGORY ROW
+-------------------------------------------------- */
 .category-row {
   display: flex;
   gap: 8px;
@@ -162,33 +192,30 @@ input, select {
 .cat-item {
   flex: 1;
   background: #f0e6ff;
-  padding: 10px;
   border-radius: 12px;
+  padding: 10px;
   text-align: center;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
 }
 
-/* SECTION TITLE */
+/* --------------------------------------------------
+   SECTION TITLE
+-------------------------------------------------- */
 .section-title {
   font-size: 18px;
   font-weight: 700;
   margin-bottom: 10px;
 }
 
-/* TASK GRID */
+/* --------------------------------------------------
+   TASK GRID & CARDS
+-------------------------------------------------- */
 .task-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 12px;
-}
-
-/* Desktop: 3 columns */
-@media (min-width: 900px) {
-  .task-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
 }
 
 .task-card {
@@ -214,7 +241,9 @@ input, select {
   margin-bottom: 4px;
 }
 
-/* HOURS BANNER */
+/* --------------------------------------------------
+   HOURS BANNER
+-------------------------------------------------- */
 .hours-banner {
   margin-top: 20px;
   background: #8a4bff;
@@ -224,7 +253,19 @@ input, select {
   box-shadow: 0 4px 12px rgba(138,75,255,0.5);
 }
 
-/* CHAT */
+.hours-banner h3 {
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.hours-banner p {
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+/* --------------------------------------------------
+   CHAT
+-------------------------------------------------- */
 .chat-box {
   min-height: 220px;
   max-height: 400px;
@@ -261,7 +302,9 @@ input, select {
   margin-top: 12px;
 }
 
-/* HOURS LIST */
+/* --------------------------------------------------
+   HOURS LIST
+-------------------------------------------------- */
 #hoursList {
   margin-top: 12px;
 }
@@ -275,7 +318,9 @@ input, select {
   font-size: 14px;
 }
 
-/* PROFILE */
+/* --------------------------------------------------
+   PROFILE
+-------------------------------------------------- */
 .pfp {
   width: 72px;
   height: 72px;
@@ -293,14 +338,18 @@ input, select {
   margin: 8px 0 12px;
 }
 
-/* TASK DETAILS */
+/* --------------------------------------------------
+   TASK DETAILS
+-------------------------------------------------- */
 .task-img {
   width: 100%;
   border-radius: 12px;
   margin: 12px 0;
 }
 
-/* BOTTOM NAV */
+/* --------------------------------------------------
+   BOTTOM NAV
+-------------------------------------------------- */
 .bottom-nav {
   position: fixed;
   bottom: 0;
@@ -327,7 +376,9 @@ input, select {
   margin-top: 2px;
 }
 
-/* DARK MODE */
+/* --------------------------------------------------
+   DARK MODE (OPTIONAL)
+-------------------------------------------------- */
 body.dark {
   background: #0f0f14;
   color: #e5e5e5;
@@ -360,7 +411,8 @@ body.dark .bottom-nav {
 }
 
 body.dark input,
-body.dark select {
+body.dark select,
+body.dark textarea {
   background: #151520;
   border-color: #333;
   color: #eee;
