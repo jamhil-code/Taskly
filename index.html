@@ -10,7 +10,6 @@
 
 <body>
 
-<!-- TOP BAR -->
 <div class="topbar">
   <div class="logo-small-bubble"></div>
   <div class="topbar-title">Taskly</div>
@@ -19,9 +18,8 @@
   </button>
 </div>
 
-<!-- HOME SCREEN -->
+<!-- HOME -->
 <div id="screen-home" class="screen active">
-
   <div class="hero-logo-wrapper">
     <div class="hero-bubble"></div>
   </div>
@@ -29,7 +27,6 @@
   <h2 class="welcome-title">Welcome back!</h2>
   <p class="welcome-sub">Lend a hand and make a difference today.</p>
 
-  <!-- SEARCH BAR -->
   <div class="search-bar">
     <input list="locationList" id="homeLocation" placeholder="Location">
 
@@ -67,7 +64,6 @@
     <button class="btn primary" onclick="navigateTo('search')">Search</button>
   </div>
 
-  <!-- CATEGORY ICONS -->
   <div class="category-row">
     <div class="cat-item" onclick="quickCategory('yard')">🌿 Yard Work</div>
     <div class="cat-item" onclick="quickCategory('tech')">💻 Tech Help</div>
@@ -75,11 +71,9 @@
     <div class="cat-item" onclick="quickCategory('pet')">🐶 Pet Care</div>
   </div>
 
-  <!-- POPULAR TASKS -->
   <h3 class="section-title">Popular Tasks for You</h3>
   <div id="homePopular" class="task-grid"></div>
 
-  <!-- HOURS BANNER -->
   <div class="hours-banner">
     <h3>Track Your Volunteer Hours & Earn Rewards!</h3>
     <p>Build your resume for the future.</p>
@@ -87,7 +81,7 @@
   </div>
 </div>
 
-<!-- SEARCH SCREEN -->
+<!-- SEARCH -->
 <div id="screen-search" class="screen">
   <h2>Search Tasks</h2>
   <input id="searchInput" placeholder="Search…" oninput="liveSearch()">
@@ -95,7 +89,7 @@
   <div id="searchResults" class="task-grid"></div>
 </div>
 
-<!-- MESSAGES SCREEN -->
+<!-- MESSAGES -->
 <div id="screen-messages" class="screen">
   <h2>Messages</h2>
   <div id="chat" class="chat-box"></div>
@@ -106,14 +100,14 @@
   </div>
 </div>
 
-<!-- HOURS SCREEN -->
+<!-- HOURS -->
 <div id="screen-hours" class="screen">
   <h2>Your Volunteer Hours</h2>
   <div id="hoursList"></div>
   <button class="btn primary" onclick="exportVolunteerHours()">Export Hours</button>
 </div>
 
-<!-- PROFILE SCREEN -->
+<!-- PROFILE -->
 <div id="screen-profile" class="screen">
   <h2>Your Profile</h2>
 
@@ -139,7 +133,7 @@
   <button class="btn primary" onclick="saveSettings()">Save</button>
 </div>
 
-<!-- TASK DETAILS SCREEN -->
+<!-- TASK DETAILS -->
 <div id="screen-task" class="screen">
   <button class="btn secondary" onclick="navigateBack()">Back</button>
 
@@ -155,7 +149,6 @@
   <p><strong>Time:</strong> <span id="tdTime"></span></p>
 </div>
 
-<!-- BOTTOM NAV -->
 <div class="bottom-nav">
   <div onclick="navigateTo('home')">🏠<span>Home</span></div>
   <div onclick="navigateTo('search')">🔍<span>Search</span></div>
