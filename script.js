@@ -1,85 +1,60 @@
-/* ------------------------------
+/* --------------------------------------------------
    GLOBAL STATE
------------------------------- */
-let currentUser = null;
+-------------------------------------------------- */
+let currentScreen = "home";
+let screenHistory = ["home"];
+
 let currentTask = null;
-let historyStack = ["login"];
-let userAvatarDataUrl = null;
+let currentUser = {
+  email: "helper@example.com",
+  name: "Helper",
+  role: "helper",
+  verified: false,
+  hours: 0,
+  tasksCompleted: 0
+};
 
-/* ------------------------------
-   STATIC DATA
------------------------------- */
-const tasks = [
-  { id: 1, title: "Clean kitchen", desc: "Help wipe counters and tidy up.", pay: "$15/hr", senior: "Mrs. Thompson", category: "cleaning" },
-  { id: 2, title: "Fix WiFi", desc: "Reconnect router and check devices.", pay: "$12/hr", senior: "Mrs. Lopez", category: "tech" },
-  { id: 3, title: "Mow lawn", desc: "Front yard mowing and bagging.", pay: "$20", senior: "Mrs. Johnson", category: "yard" }
+let allTasks = [];
+let filteredTasks = [];
+let visibleCount = 0;
+const PAGE_SIZE = 20;
+
+let messagesByTask = {};
+let volunteerHistory = [
+  { title: "Helped Mrs. Lopez with groceries", hours: 2, ts: Date.now() },
+  { title: "Fixed Wi-Fi for Mr. Lee", hours: 1, ts: Date.now() }
 ];
 
-const notifications = [
-  "New message from Mrs. Lopez",
-  "Task accepted: Grocery pickup",
-  "Reminder: Yard work tomorrow at 3 PM"
-];
-
-const historyItems = [
-  "Helped Mrs. Thompson clean kitchen (2h)",
-  "Fixed Wi‑Fi for Mrs. Lopez (1h)",
-  "Mowed lawn for Mrs. Johnson (2h)"
-];
-
-/* ------------------------------
+/* --------------------------------------------------
    NAVIGATION
------------------------------- */
-function showPage(id) {
-  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-  const page = document.getElementById(id);
-  if (page) page.classList.add("active");
-}
+-------------------------------------------------- */
+function navigateTo(screen) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById("screen-" + screen).classList.add("active");
 
-function navigate(id) {
-  historyStack.push(id);
-  showPage(id);
+  screenHistory.push(screen);
+  currentScreen = screen;
+
+  if (screen === "search") initSearch();
+  if (screen === "messages") renderChat();
+  if (screen === "hours") renderHours();
+  if (screen === "profile") loadProfile();
+
   feather.replace();
-
-  // autofocus search input when opening search page
-  if (id === "search") {
-    setTimeout(() => {
-      const input = document.getElementById("liveSearchInput");
-      if (input) {
-        input.focus();
-        input.select();
-      }
-    }, 60);
-  }
 }
 
-function goBack() {
-  if (historyStack.length > 1) {
-    historyStack.pop();
-    const prev = historyStack[historyStack.length - 1] || "home";
-    showPage(prev);
-    feather.replace();
-  }
+function navigateBack() {
+  if (screenHistory.length > 1) screenHistory.pop();
+  const prev = screenHistory[screenHistory.length - 1];
+  navigateTo(prev);
 }
 
-/* ------------------------------
-   SIDEBAR CONTROL
------------------------------- */
-function showSidebar() {
-  const sb = document.getElementById("sidebar");
-  sb.classList.remove("hidden");
-  sb.setAttribute("aria-hidden", "false");
-}
+window.navigateTo = navigateTo;
+window.navigateBack = navigateBack;
 
-function hideSidebar() {
-  const sb = document.getElementById("sidebar");
-  sb.classList.add("hidden");
-  sb.setAttribute("aria-hidden", "true");
-}
-
-/* ------------------------------
-   THEME
------------------------------- */
+/* --------------------------------------------------
+   DARK MODE
+-------------------------------------------------- */
 document.getElementById("darkToggle").onclick = () => {
   document.body.classList.toggle("dark");
   const icon = document.querySelector("#darkToggle i");
@@ -87,282 +62,258 @@ document.getElementById("darkToggle").onclick = () => {
   feather.replace();
 };
 
-/* ------------------------------
-   AUTH FLOW
------------------------------- */
-function login() {
-  const email = document.getElementById("loginEmail").value || "helper@example.com";
-  currentUser = { email, role: "helper" };
+/* --------------------------------------------------
+   TASK GENERATION
+-------------------------------------------------- */
+const categories = {
+  yard: { label: "Yard Work", color: "8bc34a", text: "ffffff" },
+  tech: { label: "Tech Help", color: "6c757d", text: "ffffff" },
+  errands: { label: "Errands", color: "f2c94c", text: "000000" },
+  pet: { label: "Pet Care", color: "f2994a", text: "ffffff" }
+};
 
-  ensureAvatar();          // generate avatar FIRST
-  loadProfile();
-  updateSidebarProfile();
-  showSidebar();
+const baseTasks = [
+  { cat: "yard", title: "Mow My Lawn", desc: "Front and backyard mowing.", pay: "$10", time: "2 hours", senior: "Mrs. Thompson" },
+  { cat: "tech", title: "Help with Computer", desc: "Basic computer troubleshooting.", pay: "Volunteer Hours", time: "1 hour", senior: "Mr. Lee" },
+  { cat: "errands", title: "Grocery Shopping Help", desc: "Pick up groceries from local store.", pay: "$15", time: "1.5 hours", senior: "Mrs. Lopez" }
+];
 
-  navigate("home");
-}
+function generateTasks(count = 200) {
+  const tasks = [];
+  let id = 1;
 
-function finishSignup(role) {
-  const email = document.getElementById("signupEmail").value || "user@example.com";
-  currentUser = { email, role };
+  for (let i = 0; i < count; i++) {
+    const base = baseTasks[i % baseTasks.length];
+    const meta = categories[base.cat];
 
-  ensureAvatar();          // generate avatar FIRST
-  loadProfile();
-  updateSidebarProfile();
-  showSidebar();
-
-  navigate("home");
-}
-
-/* ------------------------------
-   PROFILE
------------------------------- */
-function loadProfile() {
-  if (!currentUser) return;
-  document.getElementById("pEmail").textContent = currentUser.email;
-  document.getElementById("pRole").textContent = currentUser.role;
-  if (userAvatarDataUrl) {
-    document.getElementById("profilePfp").style.backgroundImage = `url(${userAvatarDataUrl})`;
-  }
-}
-
-function updateSidebarProfile() {
-  const container = document.getElementById("sidebarProfile");
-  if (!currentUser) {
-    container.classList.add("hidden");
-    return;
-  }
-  container.classList.remove("hidden");
-  document.getElementById("sidebarName").textContent = currentUser.email.split("@")[0] || "You";
-  if (userAvatarDataUrl) {
-    document.getElementById("sidebarPfp").style.backgroundImage = `url(${userAvatarDataUrl})`;
-  }
-}
-
-/* ------------------------------
-   AVATAR GENERATOR (Minecraft-style, square)
------------------------------- */
-function ensureAvatar() {
-  if (userAvatarDataUrl) return;
-
-  const resolutions = [8, 16, 32];
-  const size = resolutions[Math.floor(Math.random() * resolutions.length)];
-
-  const canvas = document.createElement("canvas");
-  canvas.width = size;
-  canvas.height = size;
-  const ctx = canvas.getContext("2d");
-
-  const palettes = [
-    ["#f4a261", "#e76f51", "#2a9d8f", "#264653"],
-    ["#ffb4a2", "#e5989b", "#b5838d", "#6d6875"],
-    ["#a8dadc", "#457b9d", "#1d3557", "#f1faee"],
-    ["#f6bd60", "#f7ede2", "#84a59d", "#f28482"],
-    ["#ffd6e0", "#ffb3c6", "#bde0fe", "#a0c4ff"]
-  ];
-
-  const palette = palettes[Math.floor(Math.random() * palettes.length)];
-  function randColor() { return palette[Math.floor(Math.random() * palette.length)]; }
-
-  // background
-  ctx.fillStyle = randColor();
-  ctx.fillRect(0, 0, size, size);
-
-  const unit = size / 8;
-
-  // eyes (white) and pupils (dark)
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(2 * unit, 2 * unit, unit, unit);
-  ctx.fillRect(5 * unit, 2 * unit, unit, unit);
-
-  ctx.fillStyle = "#000000";
-  ctx.fillRect(2 * unit + unit / 3, 2 * unit + unit / 3, unit / 3, unit / 3);
-  ctx.fillRect(5 * unit + unit / 3, 2 * unit + unit / 3, unit / 3, unit / 3);
-
-  // mouth
-  ctx.fillStyle = "#000000";
-  ctx.fillRect(2 * unit, 5 * unit, 4 * unit, Math.max(1, unit / 1.5));
-
-  // optional accessory
-  if (Math.random() < 0.5) {
-    ctx.fillStyle = randColor();
-    ctx.fillRect(1 * unit, 1 * unit, 6 * unit, Math.max(1, unit / 2));
+    tasks.push({
+      id: id++,
+      title: base.title,
+      desc: base.desc,
+      pay: base.pay,
+      time: base.time,
+      senior: base.senior,
+      category: base.cat,
+      categoryLabel: meta.label,
+      difficulty: ["Easy", "Medium", "Hard"][i % 3],
+      image: `https://placehold.co/300x200/${meta.color}/${meta.text}?text=${encodeURIComponent(meta.label)}`
+    });
   }
 
-  // upscale to crisp square image for display
-  const displayCanvas = document.createElement("canvas");
-  const displaySize = 128;
-  displayCanvas.width = displaySize;
-  displayCanvas.height = displaySize;
-  const dctx = displayCanvas.getContext("2d");
-  dctx.imageSmoothingEnabled = false;
-  dctx.drawImage(canvas, 0, 0, displaySize, displaySize);
-
-  userAvatarDataUrl = displayCanvas.toDataURL();
+  return tasks;
 }
 
-/* ------------------------------
-   SEARCH (live)
------------------------------- */
-function renderSearch(list) {
-  const box = document.getElementById("searchResults");
-  if (!list || !list.length) {
-    box.innerHTML = "<p class='muted'>No tasks found.</p>";
-    return;
-  }
-  box.innerHTML = list.map(t => `
-    <div class="task-card">
-      <h3>${escapeHtml(t.title)}</h3>
-      <p>${escapeHtml(t.desc)}</p>
-      <p><strong>${escapeHtml(t.pay)}</strong></p>
-      <button class="btn primary" onclick="openTask(${t.id})">View</button>
-    </div>
-  `).join("");
+/* --------------------------------------------------
+   HOME POPULAR TASKS
+-------------------------------------------------- */
+function loadHomePopular() {
+  const container = document.getElementById("homePopular");
+  container.innerHTML = "";
+
+  const popular = allTasks.slice(0, 3);
+
+  container.innerHTML = popular.map(taskCardHTML).join("");
+}
+
+/* --------------------------------------------------
+   SEARCH
+-------------------------------------------------- */
+function initSearch() {
+  if (!allTasks.length) allTasks = generateTasks(200);
+
+  filteredTasks = allTasks.slice();
+  visibleCount = 0;
+
+  document.getElementById("searchResults").innerHTML = "";
+  loadMoreTasks();
+  updateSearchStatus();
+
+  window.onscroll = () => {
+    const bottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 200;
+    if (bottom) loadMoreTasks();
+  };
 }
 
 function liveSearch() {
-  const q = document.getElementById("liveSearchInput").value.toLowerCase().trim();
-  const results = tasks.filter(t =>
+  const q = document.getElementById("searchInput").value.toLowerCase();
+
+  filteredTasks = allTasks.filter(t =>
     t.title.toLowerCase().includes(q) ||
     t.desc.toLowerCase().includes(q) ||
-    t.category.toLowerCase().includes(q)
+    t.categoryLabel.toLowerCase().includes(q)
   );
-  renderSearch(results);
+
+  visibleCount = 0;
+  document.getElementById("searchResults").innerHTML = "";
+  loadMoreTasks();
 }
 
-function liveSearchFromHome() {
-  const q = document.getElementById("searchInput").value.toLowerCase().trim();
-  const results = tasks.filter(t =>
-    t.title.toLowerCase().includes(q) ||
-    t.desc.toLowerCase().includes(q) ||
-    t.category.toLowerCase().includes(q)
-  );
-  // show a small preview on home (optional)
-  const box = document.getElementById("searchResults");
-  if (box) box.innerHTML = results.slice(0,3).map(t => `<div class="task-card"><h4>${escapeHtml(t.title)}</h4><p>${escapeHtml(t.desc)}</p></div>`).join("");
+window.liveSearch = liveSearch;
+
+function loadMoreTasks() {
+  const container = document.getElementById("searchResults");
+  const next = filteredTasks.slice(visibleCount, visibleCount + PAGE_SIZE);
+
+  if (!next.length) return;
+
+  container.insertAdjacentHTML("beforeend", next.map(taskCardHTML).join(""));
+  visibleCount += next.length;
+
+  updateSearchStatus();
 }
 
-function openSearchFromHome() {
-  const q = document.getElementById("searchInput").value || "";
-  navigate("search");
-  setTimeout(() => {
-    const input = document.getElementById("liveSearchInput");
-    if (input) {
-      input.value = q;
-      liveSearch();
-      input.focus();
-    }
-  }, 80);
+function updateSearchStatus() {
+  const status = document.getElementById("searchStatus");
+  status.textContent = `Showing ${visibleCount} of ${filteredTasks.length} tasks`;
 }
 
-function searchCategory(cat) {
-  navigate("search");
-  setTimeout(() => {
-    const input = document.getElementById("liveSearchInput");
-    if (input) {
-      input.value = cat;
-      liveSearch();
-      input.focus();
-    }
-  }, 80);
+/* --------------------------------------------------
+   TASK CARD HTML
+-------------------------------------------------- */
+function taskCardHTML(t) {
+  return `
+    <div class="task-card">
+      <img src="${t.image}">
+      <h3>${t.title}</h3>
+      <p>${t.desc}</p>
+      <p class="muted">${t.categoryLabel} • ${t.difficulty} • ${t.time}</p>
+      <p><strong>${t.pay}</strong></p>
+      <p class="muted">Senior: ${t.senior}</p>
+      <button class="btn primary" onclick="openTask(${t.id})">View</button>
+    </div>
+  `;
 }
 
-/* ------------------------------
-   TASK DETAILS
------------------------------- */
+/* --------------------------------------------------
+   OPEN TASK DETAILS
+-------------------------------------------------- */
 function openTask(id) {
-  currentTask = tasks.find(t => t.id === id);
-  if (!currentTask) return;
+  currentTask = allTasks.find(t => t.id === id);
+
+  document.getElementById("tdImg").src = currentTask.image;
   document.getElementById("tdTitle").textContent = currentTask.title;
   document.getElementById("tdDesc").textContent = currentTask.desc;
   document.getElementById("tdPay").textContent = currentTask.pay;
   document.getElementById("tdSenior").textContent = currentTask.senior;
-  navigate("taskDetails");
+  document.getElementById("tdCat").textContent = currentTask.categoryLabel;
+  document.getElementById("tdDiff").textContent = currentTask.difficulty;
+  document.getElementById("tdTime").textContent = currentTask.time;
+
+  navigateTo("task");
 }
 
-/* ------------------------------
-   POST TASK
------------------------------- */
-function postTask() {
-  const title = document.getElementById("ptTitle").value.trim();
-  const desc = document.getElementById("ptDesc").value.trim();
-  const cat = document.getElementById("ptCat").value;
-  const pay = document.getElementById("ptPay").value.trim();
-  if (!title) { alert("Please add a title."); return; }
-  const id = tasks.length + 1;
-  tasks.push({ id, title, desc, pay: pay || "$0", senior: currentUser ? currentUser.email.split("@")[0] : "User", category: cat });
-  alert("Task posted (local only).");
-  navigate("home");
-}
+window.openTask = openTask;
 
-/* ------------------------------
-   MESSAGES + SENIOR-STYLE AI
------------------------------- */
+/* --------------------------------------------------
+   MESSAGES
+-------------------------------------------------- */
 function sendMsg() {
   const input = document.getElementById("chatInput");
   const text = input.value.trim();
   if (!text) return;
-  addBubble(text, "me");
+
+  const id = currentTask ? currentTask.id : "general";
+  if (!messagesByTask[id]) messagesByTask[id] = [];
+
+  messagesByTask[id].push({ from: "me", text });
+
   input.value = "";
+  renderChat();
+
   setTimeout(() => {
-    const reply = generateSeniorReply(text);
-    addBubble(reply, "them");
-  }, 700);
+    messagesByTask[id].push({ from: "them", text: generateReply(text) });
+    renderChat();
+  }, 600);
 }
 
-function addBubble(text, who) {
+window.sendMsg = sendMsg;
+
+function renderChat() {
   const chat = document.getElementById("chat");
-  const div = document.createElement("div");
-  div.className = "chat-bubble " + who;
-  div.textContent = text;
-  chat.appendChild(div);
+  chat.innerHTML = "";
+
+  const id = currentTask ? currentTask.id : "general";
+  const msgs = messagesByTask[id] || [];
+
+  msgs.forEach(m => {
+    const div = document.createElement("div");
+    div.className = "chat-bubble " + (m.from === "me" ? "me" : "them");
+    div.textContent = m.text;
+    chat.appendChild(div);
+  });
+
   chat.scrollTop = chat.scrollHeight;
 }
 
-function generateSeniorReply(userText) {
-  const lower = userText.toLowerCase();
-  if (lower.includes("wifi") || lower.includes("internet")) return "Oh thank you dear, I always get confused with the internet.";
-  if (lower.includes("time") || lower.includes("when")) return "Any time this afternoon is fine, dear. I’m usually at home.";
-  if (lower.includes("grocery") || lower.includes("groceries")) return "That would be lovely, dear. I can give you a small list.";
-  if (lower.includes("hello") || lower.includes("hi")) return "Hello dear, it’s so nice to hear from you.";
-  if (lower.includes("bye") || lower.includes("goodnight")) return "Goodbye dear, thank you again for your kindness.";
-  return "Oh thank you dear, that’s very kind of you.";
+function generateReply(text) {
+  const t = text.toLowerCase();
+  if (t.includes("hello")) return "Hello dear, so nice to hear from you.";
+  if (t.includes("time")) return "Any time this afternoon works for me.";
+  if (t.includes("wifi")) return "Oh thank you dear, I always get confused with the internet.";
+  return "Thank you dear, that’s very kind of you.";
 }
 
-/* ------------------------------
-   SETTINGS
------------------------------- */
+/* --------------------------------------------------
+   HOURS
+-------------------------------------------------- */
+function renderHours() {
+  const list = document.getElementById("hoursList");
+  list.innerHTML = volunteerHistory
+    .map(h => `<div class="hours-item">${h.title} — ${h.hours}h</div>`)
+    .join("");
+}
+
+function exportVolunteerHours() {
+  alert("Hours exported! (placeholder)");
+}
+
+window.exportVolunteerHours = exportVolunteerHours;
+
+/* --------------------------------------------------
+   PROFILE
+-------------------------------------------------- */
+function loadProfile() {
+  document.getElementById("pEmail").textContent = currentUser.email;
+  document.getElementById("pName").textContent = currentUser.name;
+  document.getElementById("pRole").textContent = currentUser.role;
+
+  document.getElementById("setEmail").value = currentUser.email;
+  document.getElementById("peName").value = currentUser.name;
+  document.getElementById("peRole").value = currentUser.role;
+  document.getElementById("peVerified").checked = currentUser.verified;
+
+  document.getElementById("pRank").textContent =
+    `Tasks: ${currentUser.tasksCompleted} • Hours: ${currentUser.hours}`;
+}
+
 function saveSettings() {
-  const newEmail = document.getElementById("setEmail").value.trim();
-  if (currentUser && newEmail) {
-    currentUser.email = newEmail;
-    loadProfile();
-    updateSidebarProfile();
-  }
+  currentUser.email = document.getElementById("setEmail").value;
+  currentUser.name = document.getElementById("peName").value;
+  currentUser.role = document.getElementById("peRole").value;
+  currentUser.verified = document.getElementById("peVerified").checked;
+
+  loadProfile();
   alert("Saved!");
 }
 
-/* ------------------------------
-   NOTIFICATIONS & HISTORY
------------------------------- */
-function loadLists() {
-  document.getElementById("notifList").innerHTML = notifications.map(n => `<li>${escapeHtml(n)}</li>`).join("");
-  document.getElementById("historyList").innerHTML = historyItems.map(h => `<li>${escapeHtml(h)}</li>`).join("");
+window.saveSettings = saveSettings;
+
+/* --------------------------------------------------
+   QUICK CATEGORY SEARCH
+-------------------------------------------------- */
+function quickCategory(cat) {
+  navigateTo("search");
+  document.getElementById("searchInput").value = categories[cat].label;
+  liveSearch();
 }
 
-/* ------------------------------
-   UTIL
------------------------------- */
-function escapeHtml(str) {
-  return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
-}
+window.quickCategory = quickCategory;
 
-/* ------------------------------
+/* --------------------------------------------------
    INIT
------------------------------- */
+-------------------------------------------------- */
 window.onload = () => {
-  hideSidebar();
-  showPage("login");
-  loadLists();
+  allTasks = generateTasks(200);
+  loadHomePopular();
   feather.replace();
 };
