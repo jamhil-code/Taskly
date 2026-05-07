@@ -1,235 +1,354 @@
-/* RESET */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/* --------------------------------------------------
+   GLOBAL STATE
+-------------------------------------------------- */
+let currentScreen = "home";
+let screenHistory = ["home"];
+
+let currentTask = null;
+let currentUser = {
+  email: "helper@example.com",
+  name: "Helper",
+  role: "helper",
+  verified: false,
+  hours: 0,
+  tasksCompleted: 0
+};
+
+let allTasks = [];
+let filteredTasks = [];
+let visibleCount = 0;
+const PAGE_SIZE = 20;
+
+let messagesByTask = {};
+let volunteerHistory = [
+  { title: "Helped Mrs. Lopez with groceries", hours: 2, ts: Date.now() },
+  { title: "Fixed Wi-Fi for Mr. Lee", hours: 1, ts: Date.now() }
+];
+
+/* --------------------------------------------------
+   NAVIGATION
+-------------------------------------------------- */
+function navigateTo(screen) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById("screen-" + screen).classList.add("active");
+
+  screenHistory.push(screen);
+  currentScreen = screen;
+
+  if (screen === "search") initSearch();
+  if (screen === "messages") renderChat();
+  if (screen === "hours") renderHours();
+  if (screen === "profile") loadProfile();
+
+  feather.replace();
 }
 
-body {
-  font-family: system-ui, sans-serif;
-  background: #f5f6ff;
-  color: #222;
-  padding-bottom: 80px;
+function navigateBack() {
+  if (screenHistory.length > 1) screenHistory.pop();
+  const prev = screenHistory[screenHistory.length - 1];
+  navigateTo(prev);
 }
 
-/* TOP BAR */
-.topbar {
-  position: sticky;
-  top: 0;
-  height: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
-  background: rgba(255,255,255,0.85);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(0,0,0,0.05);
-}
+window.navigateTo = navigateTo;
+window.navigateBack = navigateBack;
 
-.logo-small-bubble {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #e8caff, #b47aff);
-  box-shadow: 0 0 10px rgba(180,122,255,0.7);
-  position: relative;
-}
+/* --------------------------------------------------
+   DARK MODE
+-------------------------------------------------- */
+document.getElementById("darkToggle").onclick = () => {
+  document.body.classList.toggle("dark");
+  const icon = document.querySelector("#darkToggle i");
+  icon.setAttribute("data-feather", document.body.classList.contains("dark") ? "sun" : "moon");
+  feather.replace();
+};
 
-.logo-small-bubble::after {
-  content: "";
-  position: absolute;
-  top: 6px;
-  left: 10px;
-  width: 12px;
-  height: 12px;
-  background: rgba(255,255,255,0.7);
-  border-radius: 50%;
-  filter: blur(4px);
-}
+/* --------------------------------------------------
+   TASK GENERATION
+-------------------------------------------------- */
+const categories = {
+  yard: { label: "Yard Work", color: "8bc34a", text: "ffffff" },
+  tech: { label: "Tech Help", color: "6c757d", text: "ffffff" },
+  errands: { label: "Errands", color: "f2c94c", text: "000000" },
+  pet: { label: "Pet Care", color: "f2994a", text: "ffffff" }
+};
 
-.btn-icon {
-  background: none;
-  border: none;
-  cursor: pointer;
-}
+const baseTasks = [
+  { cat: "yard", title: "Mow My Lawn", desc: "Front and backyard mowing.", pay: "$10", time: "2 hours", senior: "Mrs. Thompson" },
+  { cat: "tech", title: "Help with Computer", desc: "Basic computer troubleshooting.", pay: "Volunteer Hours", time: "1 hour", senior: "Mr. Lee" },
+  { cat: "errands", title: "Grocery Shopping Help", desc: "Pick up groceries from local store.", pay: "$15", time: "1.5 hours", senior: "Mrs. Lopez" }
+];
 
-/* SCREENS */
-.screen {
-  display: none;
-  padding: 16px;
-}
+function generateTasks(count = 200) {
+  const tasks = [];
+  let id = 1;
 
-.screen.active {
-  display: block;
-}
+  for (let i = 0; i < count; i++) {
+    const base = baseTasks[i % baseTasks.length];
+    const meta = categories[base.cat];
 
-/* HERO BUBBLE */
-.hero-logo-wrapper {
-  display: flex;
-  justify-content: center;
-  margin-top: 16px;
-}
-
-.hero-bubble {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #f0d9ff, #b47aff);
-  box-shadow: 0 0 24px rgba(180,122,255,0.7);
-  animation: floatBubble 4s ease-in-out infinite;
-}
-
-@keyframes floatBubble {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-12px); }
-  100% { transform: translateY(0); }
-}
-
-/* HOME TEXT */
-.welcome-title {
-  text-align: center;
-  font-size: 22px;
-  font-weight: 700;
-}
-
-.welcome-sub {
-  text-align: center;
-  color: #666;
-  margin-bottom: 16px;
-}
-
-/* SEARCH BAR */
-.search-bar {
-  display: grid;
-  grid-template-columns: 1.2fr 1.2fr auto;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-
-input, select {
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-}
-
-/* CATEGORY ROW */
-.category-row {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
-}
-
-.cat-item {
-  flex: 1;
-  background: #f0e6ff;
-  padding: 10px;
-  border-radius: 12px;
-  text-align: center;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-/* TASK GRID */
-.task-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-}
-
-/* DESKTOP: 3 columns */
-@media (min-width: 768px) {
-  .task-grid {
-    grid-template-columns: repeat(3, 1fr);
+    tasks.push({
+      id: id++,
+      title: base.title,
+      desc: base.desc,
+      pay: base.pay,
+      time: base.time,
+      senior: base.senior,
+      category: base.cat,
+      categoryLabel: meta.label,
+      difficulty: ["Easy", "Medium", "Hard"][i % 3],
+      image: `https://placehold.co/300x200/${meta.color}/${meta.text}?text=${encodeURIComponent(meta.label)}`
+    });
   }
+
+  return tasks;
 }
 
-.task-card {
-  background: #fff;
-  padding: 12px;
-  border-radius: 14px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+/* --------------------------------------------------
+   HOME POPULAR TASKS
+-------------------------------------------------- */
+function loadHomePopular() {
+  const container = document.getElementById("homePopular");
+  container.innerHTML = "";
+
+  const popular = allTasks.slice(0, 3);
+
+  container.innerHTML = popular.map(taskCardHTML).join("");
 }
 
-.task-card img {
-  width: 100%;
-  border-radius: 10px;
-  margin-bottom: 8px;
+/* --------------------------------------------------
+   FUZZY SEARCH (AI SPELLING FIX)
+-------------------------------------------------- */
+function levenshtein(a, b) {
+  const matrix = Array.from({ length: a.length + 1 }, () => []);
+  for (let i = 0; i <= a.length; i++) matrix[i][0] = i;
+  for (let j = 0; j <= b.length; j++) matrix[0][j] = j;
+
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      matrix[i][j] = Math.min(
+        matrix[i - 1][j] + 1,
+        matrix[i][j - 1] + 1,
+        matrix[i - 1][j - 1] + cost
+      );
+    }
+  }
+  return matrix[a.length][b.length];
 }
 
-/* HOURS BANNER */
-.hours-banner {
-  background: #8a4bff;
-  color: #fff;
-  padding: 16px;
-  border-radius: 16px;
-  margin-top: 20px;
+/* --------------------------------------------------
+   SEARCH
+-------------------------------------------------- */
+function initSearch() {
+  if (!allTasks.length) allTasks = generateTasks(200);
+
+  filteredTasks = allTasks.slice();
+  visibleCount = 0;
+
+  document.getElementById("searchResults").innerHTML = "";
+  loadMoreTasks();
+  updateSearchStatus();
+
+  window.onscroll = () => {
+    const bottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 200;
+    if (bottom) loadMoreTasks();
+  };
 }
 
-/* CHAT */
-.chat-box {
-  min-height: 220px;
-  max-height: 400px;
-  overflow-y: auto;
-  background: #fff;
-  padding: 12px;
-  border-radius: 12px;
+function liveSearch() {
+  const q = document.getElementById("searchInput").value.toLowerCase().trim();
+
+  if (!q) {
+    filteredTasks = allTasks.slice();
+  } else {
+    filteredTasks = allTasks.filter(t => {
+      const fields = [
+        t.title.toLowerCase(),
+        t.desc.toLowerCase(),
+        t.categoryLabel.toLowerCase()
+      ];
+
+      return fields.some(f => {
+        if (f.includes(q)) return true;
+        return levenshtein(f, q) <= 3;
+      });
+    });
+  }
+
+  visibleCount = 0;
+  document.getElementById("searchResults").innerHTML = "";
+  loadMoreTasks();
 }
 
-.chat-bubble {
-  padding: 8px 12px;
-  border-radius: 14px;
-  margin-bottom: 8px;
-  max-width: 80%;
+window.liveSearch = liveSearch;
+
+/* --------------------------------------------------
+   LOAD MORE TASKS
+-------------------------------------------------- */
+function loadMoreTasks() {
+  const container = document.getElementById("searchResults");
+  const next = filteredTasks.slice(visibleCount, visibleCount + PAGE_SIZE);
+
+  if (!next.length) return;
+
+  container.insertAdjacentHTML("beforeend", next.map(taskCardHTML).join(""));
+  visibleCount += next.length;
+
+  updateSearchStatus();
 }
 
-.chat-bubble.me {
-  background: #8a4bff;
-  color: #fff;
-  margin-left: auto;
+function updateSearchStatus() {
+  const status = document.getElementById("searchStatus");
+  status.textContent = `Showing ${visibleCount} of ${filteredTasks.length} tasks`;
 }
 
-.chat-bubble.them {
-  background: #f1f1ff;
+/* --------------------------------------------------
+   TASK CARD HTML
+-------------------------------------------------- */
+function taskCardHTML(t) {
+  return `
+    <div class="task-card">
+      <img src="${t.image}">
+      <h3>${t.title}</h3>
+      <p>${t.desc}</p>
+      <p class="muted">${t.categoryLabel} • ${t.difficulty} • ${t.time}</p>
+      <p><strong>${t.pay}</strong></p>
+      <p class="muted">Senior: ${t.senior}</p>
+      <button class="btn primary" onclick="openTask(${t.id})">View</button>
+    </div>
+  `;
 }
 
-/* HOURS LIST */
-.hours-item {
-  background: #fff;
-  padding: 10px;
-  border-radius: 12px;
-  margin-bottom: 8px;
+/* --------------------------------------------------
+   OPEN TASK DETAILS
+-------------------------------------------------- */
+function openTask(id) {
+  currentTask = allTasks.find(t => t.id === id);
+
+  document.getElementById("tdImg").src = currentTask.image;
+  document.getElementById("tdTitle").textContent = currentTask.title;
+  document.getElementById("tdDesc").textContent = currentTask.desc;
+  document.getElementById("tdPay").textContent = currentTask.pay;
+  document.getElementById("tdSenior").textContent = currentTask.senior;
+  document.getElementById("tdCat").textContent = currentTask.categoryLabel;
+  document.getElementById("tdDiff").textContent = currentTask.difficulty;
+  document.getElementById("tdTime").textContent = currentTask.time;
+
+  navigateTo("task");
 }
 
-/* PROFILE */
-.pfp {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: #ddd;
-  margin-bottom: 10px;
+window.openTask = openTask;
+
+/* --------------------------------------------------
+   MESSAGES
+-------------------------------------------------- */
+function sendMsg() {
+  const input = document.getElementById("chatInput");
+  const text = input.value.trim();
+  if (!text) return;
+
+  const id = currentTask ? currentTask.id : "general";
+  if (!messagesByTask[id]) messagesByTask[id] = [];
+
+  messagesByTask[id].push({ from: "me", text });
+
+  input.value = "";
+  renderChat();
+
+  setTimeout(() => {
+    messagesByTask[id].push({ from: "them", text: generateReply(text) });
+    renderChat();
+  }, 600);
 }
 
-/* BOTTOM NAV */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  height: 64px;
-  width: 100%;
-  background: #fff;
-  border-top: 1px solid rgba(0,0,0,0.08);
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
+window.sendMsg = sendMsg;
+
+function renderChat() {
+  const chat = document.getElementById("chat");
+  chat.innerHTML = "";
+
+  const id = currentTask ? currentTask.id : "general";
+  const msgs = messagesByTask[id] || [];
+
+  msgs.forEach(m => {
+    const div = document.createElement("div");
+    div.className = "chat-bubble " + (m.from === "me" ? "me" : "them");
+    div.textContent = m.text;
+    chat.appendChild(div);
+  });
+
+  chat.scrollTop = chat.scrollHeight;
 }
 
-.bottom-nav div {
-  text-align: center;
-  font-size: 20px;
-  cursor: pointer;
+function generateReply(text) {
+  const t = text.toLowerCase();
+  if (t.includes("hello")) return "Hello dear, so nice to hear from you.";
+  if (t.includes("time")) return "Any time this afternoon works for me.";
+  if (t.includes("wifi")) return "Oh thank you dear, I always get confused with the internet.";
+  return "Thank you dear, that’s very kind of you.";
 }
 
-.bottom-nav span {
-  display: block;
-  font-size: 11px;
+/* --------------------------------------------------
+   HOURS
+-------------------------------------------------- */
+function renderHours() {
+  const list = document.getElementById("hoursList");
+  list.innerHTML = volunteerHistory
+    .map(h => `<div class="hours-item">${h.title} — ${h.hours}h</div>`)
+    .join("");
 }
+
+function exportVolunteerHours() {
+  alert("Hours exported! (placeholder)");
+}
+
+window.exportVolunteerHours = exportVolunteerHours;
+
+/* --------------------------------------------------
+   PROFILE
+-------------------------------------------------- */
+function loadProfile() {
+  document.getElementById("pEmail").textContent = currentUser.email;
+  document.getElementById("pName").textContent = currentUser.name;
+  document.getElementById("pRole").textContent = currentUser.role;
+
+  document.getElementById("setEmail").value = currentUser.email;
+  document.getElementById("peName").value = currentUser.name;
+  document.getElementById("peRole").value = currentUser.role;
+  document.getElementById("peVerified").checked = currentUser.verified;
+
+  document.getElementById("pRank").textContent =
+    `Tasks: ${currentUser.tasksCompleted} • Hours: ${currentUser.hours}`;
+}
+
+function saveSettings() {
+  currentUser.email = document.getElementById("setEmail").value;
+  currentUser.name = document.getElementById("peName").value;
+  currentUser.role = document.getElementById("peRole").value;
+  currentUser.verified = document.getElementById("peVerified").checked;
+
+  loadProfile();
+  alert("Saved!");
+}
+
+window.saveSettings = saveSettings;
+
+/* --------------------------------------------------
+   QUICK CATEGORY SEARCH
+-------------------------------------------------- */
+function quickCategory(cat) {
+  navigateTo("search");
+  document.getElementById("searchInput").value = categories[cat].label;
+  liveSearch();
+}
+
+window.quickCategory = quickCategory;
+
+/* --------------------------------------------------
+   INIT
+-------------------------------------------------- */
+window.onload = () => {
+  allTasks = generateTasks(200);
+  loadHomePopular();
+  feather.replace();
+};
