@@ -1,5 +1,5 @@
 /* --------------------------------------------------
-   RESET & BASE
+   RESET
 -------------------------------------------------- */
 * {
   margin: 0;
@@ -8,11 +8,11 @@
 }
 
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: system-ui, sans-serif;
   background: #f5f6ff;
   color: #222;
-  line-height: 1.5;
   padding-bottom: 80px; /* space for bottom nav */
+  overflow-x: hidden;
 }
 
 .muted {
@@ -32,7 +32,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
-  background: rgba(255,255,255,0.85);
+  background: rgba(255,255,255,0.9);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(0,0,0,0.05);
 }
@@ -42,7 +42,6 @@ body {
   font-size: 18px;
 }
 
-/* small bubble logo */
 .logo-small-bubble {
   width: 32px;
   height: 32px;
@@ -50,7 +49,6 @@ body {
   background: radial-gradient(circle at 30% 30%, #e8caff, #b47aff);
   box-shadow: 0 0 10px rgba(180,122,255,0.7);
   position: relative;
-  overflow: hidden;
 }
 
 .logo-small-bubble::after {
@@ -69,7 +67,6 @@ body {
   border: none;
   background: transparent;
   cursor: pointer;
-  padding: 6px;
 }
 
 /* --------------------------------------------------
@@ -78,6 +75,8 @@ body {
 .screen {
   display: none;
   padding: 16px;
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
 .screen.active {
@@ -85,7 +84,7 @@ body {
 }
 
 /* --------------------------------------------------
-   HERO BUBBLE (HOME)
+   HERO BUBBLE
 -------------------------------------------------- */
 .hero-logo-wrapper {
   display: flex;
@@ -100,20 +99,7 @@ body {
   border-radius: 50%;
   background: radial-gradient(circle at 30% 30%, #f0d9ff, #b47aff);
   box-shadow: 0 0 24px rgba(180,122,255,0.7);
-  position: relative;
   animation: floatBubble 4s ease-in-out infinite;
-}
-
-.hero-bubble::after {
-  content: "";
-  position: absolute;
-  top: 18px;
-  left: 26px;
-  width: 32px;
-  height: 32px;
-  background: rgba(255,255,255,0.7);
-  border-radius: 50%;
-  filter: blur(8px);
 }
 
 @keyframes floatBubble {
@@ -159,10 +145,15 @@ body {
   background: #7a3be8;
 }
 
+.btn.secondary {
+  background: #eee;
+  color: #333;
+}
+
 /* --------------------------------------------------
    INPUTS
 -------------------------------------------------- */
-input, select, textarea {
+input, select {
   width: 100%;
   padding: 10px 12px;
   border-radius: 10px;
@@ -171,7 +162,7 @@ input, select, textarea {
 }
 
 /* --------------------------------------------------
-   SEARCH BAR (HOME)
+   SEARCH BAR
 -------------------------------------------------- */
 .search-bar {
   display: grid;
@@ -192,8 +183,8 @@ input, select, textarea {
 .cat-item {
   flex: 1;
   background: #f0e6ff;
-  border-radius: 12px;
   padding: 10px;
+  border-radius: 12px;
   text-align: center;
   font-size: 13px;
   font-weight: 600;
@@ -210,12 +201,19 @@ input, select, textarea {
 }
 
 /* --------------------------------------------------
-   TASK GRID & CARDS
+   TASK GRID
 -------------------------------------------------- */
 .task-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 12px;
+}
+
+/* Desktop: 3 columns */
+@media (min-width: 900px) {
+  .task-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .task-card {
@@ -251,16 +249,6 @@ input, select, textarea {
   border-radius: 16px;
   padding: 16px;
   box-shadow: 0 4px 12px rgba(138,75,255,0.5);
-}
-
-.hours-banner h3 {
-  font-size: 16px;
-  margin-bottom: 4px;
-}
-
-.hours-banner p {
-  font-size: 14px;
-  margin-bottom: 10px;
 }
 
 /* --------------------------------------------------
@@ -377,7 +365,7 @@ input, select, textarea {
 }
 
 /* --------------------------------------------------
-   DARK MODE (OPTIONAL)
+   DARK MODE
 -------------------------------------------------- */
 body.dark {
   background: #0f0f14;
@@ -411,8 +399,7 @@ body.dark .bottom-nav {
 }
 
 body.dark input,
-body.dark select,
-body.dark textarea {
+body.dark select {
   background: #151520;
   border-color: #333;
   color: #eee;
