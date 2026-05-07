@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Taskly</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://unpkg.com/feather-icons"></script>
+</head>
+<body>
+  <div class="bg"></div>
+
+  <header class="topbar">
+    <div class="logo">Taskly</div>
+    <div class="top-actions">
+      <button id="darkToggle" class="icon-btn" aria-label="Toggle theme">
+        <i data-feather="moon"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- SIDEBAR (hidden until login) -->
+  <nav id="sidebar" class="sidebar hidden" aria-hidden="true">
+    <div class="sidebar-main" role="navigation" aria-label="Main navigation">
+      <button class="sb-btn" onclick="navigate('home')"><i data-feather="home"></i><span>Home</span></button>
+      <button class="sb-btn" onclick="navigate('search')"><i data-feather="search"></i><span>Search</span></button>
+      <button class="sb-btn" onclick="navigate('messages')"><i data-feather="message-circle"></i><span>Messages</span></button>
+      <button class="sb-btn" onclick="navigate('dashboard')"><i data-feather="bar-chart-2"></i><span>Dashboard</span></button>
+      <button class="sb-btn" onclick="navigate('notifications')"><i data-feather="bell"></i><span>Alerts</span></button>
+      <button class="sb-btn" onclick="navigate('history')"><i data-feather="book-open"></i><span>History</span></button>
+      <button class="sb-btn" onclick="navigate('postTask')"><i data-feather="plus-circle"></i><span>Post</span></button>
+    </div>
+
+    <div id="sidebarProfile" class="sidebar-profile hidden" onclick="navigate('profile')" role="button" aria-label="Open profile">
+      <div class="sidebar-pfp" id="sidebarPfp" aria-hidden="true"></div>
+      <div class="sidebar-profile-text">
+        <span class="sidebar-profile-name" id="sidebarName">You</span>
+        <span class="sidebar-profile-link">Profile</span>
+      </div>
+    </div>
+  </nav>
+
+  <main id="app" role="main">
+    <!-- LOGIN -->
+    <section id="login" class="page active" aria-labelledby="loginTitle">
+      <div class="card center">
+        <h2 id="loginTitle">Log In</h2>
+        <input id="loginEmail" class="input" placeholder="Email" inputmode="email" autocomplete="username">
+        <input id="loginPass" class="input" type="password" placeholder="Password" autocomplete="current-password">
+        <button class="btn primary" onclick="login()">Log In</button>
+        <p class="muted">No account?
+          <button class="link-btn" onclick="navigate('signup')">Sign up</button>
+        </p>
+      </div>
+    </section>
+
+    <!-- SIGNUP -->
+    <section id="signup" class="page" aria-labelledby="signupTitle">
+      <div class="card center">
+        <button class="back-btn" onclick="goBack()"><i data-feather="arrow-left"></i>Back</button>
+        <h2 id="signupTitle">Create Account</h2>
+        <input id="signupEmail" class="input" placeholder="Email" inputmode="email">
+        <input id="signupPass" class="input" type="password" placeholder="Password">
+        <button class="btn primary" onclick="navigate('role')">Next</button>
+      </div>
+    </section>
+
+    <!-- ROLE -->
+    <section id="role" class="page" aria-labelledby="roleTitle">
+      <div class="card center">
+        <button class="back-btn" onclick="goBack()"><i data-feather="arrow-left"></i>Back</button>
+        <h2 id="roleTitle">Your Role</h2>
+        <button class="btn primary wide" onclick="finishSignup('helper')">I want to help</button>
+        <button class="btn secondary wide" onclick="finishSignup('senior')">I need help</button>
+      </div>
+    </section>
+
+    <!-- HOME -->
+    <section id="home" class="page" aria-labelledby="homeTitle">
+      <div class="card">
+        <h1 id="homeTitle">Welcome to Taskly</h1>
+        <p class="muted">Connecting teens with seniors safely.</p>
+        <button class="btn primary" onclick="navigate('dashboard')">View Dashboard</button>
+      </div>
+
+      <div class="card">
+        <h3>Quick Search</h3>
+        <div class="row">
+          <input id="searchInput" class="input" placeholder="Search tasks…" oninput="liveSearchFromHome()">
+          <button class="btn primary" onclick="openSearchFromHome()">Go</button>
+        </div>
+        <div class="chips">
+          <button class="chip" onclick="searchCategory('cleaning')">Cleaning</button>
+          <button class="chip" onclick="searchCategory('tech')">Tech</button>
+          <button class="chip" onclick="searchCategory('yard')">Yard</button>
+          <button class="chip" onclick="searchCategory('errands')">Errands</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- DEDICATED SEARCH PAGE -->
+    <section id="search" class="page" aria-labelledby="searchTitle">
+      <div class="card">
+        <button class="back-btn" onclick="goBack()"><i data-feather="arrow-left"></i>Back</button>
+        <h2 id="searchTitle">Search</h2>
+        <input id="liveSearchInput" class="input" placeholder="Search for tasks…" oninput="liveSearch()" autocomplete="off">
+        <div id="searchResults" class="grid" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- TASK DETAILS -->
+    <section id="taskDetails" class="page" aria-labelledby="tdTitle">
+      <div class="card">
+        <button class="back-btn" onclick="goBack()"><i data-feather="arrow-left"></i>Back</button>
+        <h2 id="tdTitle"></h2>
+        <p id="tdDesc"></p>
+        <p><strong>Pay:</strong> <span id="tdPay"></span></p>
+        <p><strong>Senior:</strong> <span id="tdSenior"></span></p>
+        <button class="btn primary" onclick="navigate('messages')">Message</button>
+      </div>
+    </section>
+
+    <!-- POST TASK -->
+    <section id="postTask" class="page" aria-labelledby="postTitle">
+      <div class="card">
+        <button class="back-btn" onclick="goBack()"><i data-feather="arrow-left"></i>Back</button>
+        <h2 id="postTitle">Post a Task</h2>
+        <input id="ptTitle" class="input" placeholder="Title">
+        <textarea id="ptDesc" class="input" placeholder="Description"></textarea>
+        <select id="ptCat" class="input">
+          <option value="cleaning">Cleaning</option>
+          <option value="tech">Tech</option>
+          <option value="yard">Yard</option>
+          <option value="errands">Errands</option>
+        </select>
+        <input id="ptPay" class="input" placeholder="Pay">
+        <button class="btn primary" onclick="postTask()">Post</button>
+      </div>
+    </section>
+
+    <!-- MESSAGES -->
+    <section id="messages" class="page" aria-labelledby="messagesTitle">
+      <div class="card">
+        <button class="back-btn" onclick="goBack()"><i data-feather="arrow-left"></i>Back</button>
+        <h2 id="messagesTitle">Messages</h2>
+        <div id="chat" class="chat" aria-live="polite"></div>
+        <div class="row">
+          <input id="chatInput" class="input" placeholder="Type…" onkeydown="if(event.key==='Enter') sendMsg()">
+          <button class="btn primary" onclick="sendMsg()">Send</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROFILE -->
+    <section id="profile" class="page" aria-labelledby="profileTitle">
+      <div class="card center">
+        <button class="back-btn" onclick="goBack()"><i data-feather="arrow-left"></i>Back</button>
+        <div class="pfp" id="profilePfp" aria-hidden="true"></div>
+        <h2 id="pEmail"></h2>
+        <p class="muted">Role: <span id="pRole"></span></p>
+        <button class="btn secondary" onclick="navigate('settings')">Settings</button>
+      </div>
+    </section>
+
+    <!-- DASHBOARD -->
+    <section id="dashboard" class="page" aria-labelledby="dashboardTitle">
+      <div class="card">
+        <button class="back-btn" onclick="goBack()"><i data-feather="arrow-left"></i>Back</button>
+        <h2 id="dashboardTitle">Dashboard</h2>
+        <p><strong>Tasks:</strong> <span id="dTasks">3</span></p>
+        <p><strong>Hours:</strong> <span id="dHours">5</span></p>
+        <p><strong>Seniors Helped:</strong> <span id="dSeniors">2</span></p>
+      </div>
+    </section>
+
+    <!-- NOTIFICATIONS -->
+    <section id="notifications" class="page" aria-labelledby="notificationsTitle">
+      <div class="card">
+        <button class="back-btn" onclick="goBack()"><i data-feather="arrow-left"></i>Back</button>
+        <h2 id="notificationsTitle">Alerts</h2>
+        <ul id="notifList"></ul>
+      </div>
+    </section>
+
+    <!-- HISTORY -->
+    <section id="history" class="page" aria-labelledby="historyTitle">
+      <div class="card">
+        <button class="back-btn" onclick="goBack()"><i data-feather="arrow-left"></i>Back</button>
+        <h2 id="historyTitle">Task History</h2>
+        <ul id="historyList"></ul>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="settings" class="page" aria-labelledby="settingsTitle">
+      <div class="card">
+        <button class="back-btn" onclick="goBack()"><i data-feather="arrow-left"></i>Back</button>
+        <h2 id="settingsTitle">Settings</h2>
+        <input id="setEmail" class="input" placeholder="New email">
+        <button class="btn primary" onclick="saveSettings()">Save</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
