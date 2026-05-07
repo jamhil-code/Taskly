@@ -116,27 +116,6 @@ function loadHomePopular() {
 }
 
 /* --------------------------------------------------
-   FUZZY SEARCH (AI SPELLING FIX)
--------------------------------------------------- */
-function levenshtein(a, b) {
-  const matrix = Array.from({ length: a.length + 1 }, () => []);
-  for (let i = 0; i <= a.length; i++) matrix[i][0] = i;
-  for (let j = 0; j <= b.length; j++) matrix[0][j] = j;
-
-  for (let i = 1; i <= a.length; i++) {
-    for (let j = 1; j <= b.length; j++) {
-      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-      matrix[i][j] = Math.min(
-        matrix[i - 1][j] + 1,
-        matrix[i][j - 1] + 1,
-        matrix[i - 1][j - 1] + cost
-      );
-    }
-  }
-  return matrix[a.length][b.length];
-}
-
-/* --------------------------------------------------
    SEARCH
 -------------------------------------------------- */
 function initSearch() {
@@ -156,24 +135,13 @@ function initSearch() {
 }
 
 function liveSearch() {
-  const q = document.getElementById("searchInput").value.toLowerCase().trim();
+  const q = document.getElementById("searchInput").value.toLowerCase();
 
-  if (!q) {
-    filteredTasks = allTasks.slice();
-  } else {
-    filteredTasks = allTasks.filter(t => {
-      const fields = [
-        t.title.toLowerCase(),
-        t.desc.toLowerCase(),
-        t.categoryLabel.toLowerCase()
-      ];
-
-      return fields.some(f => {
-        if (f.includes(q)) return true;
-        return levenshtein(f, q) <= 3;
-      });
-    });
-  }
+  filteredTasks = allTasks.filter(t =>
+    t.title.toLowerCase().includes(q) ||
+    t.desc.toLowerCase().includes(q) ||
+    t.categoryLabel.toLowerCase().includes(q)
+  );
 
   visibleCount = 0;
   document.getElementById("searchResults").innerHTML = "";
@@ -182,9 +150,6 @@ function liveSearch() {
 
 window.liveSearch = liveSearch;
 
-/* --------------------------------------------------
-   LOAD MORE TASKS
--------------------------------------------------- */
 function loadMoreTasks() {
   const container = document.getElementById("searchResults");
   const next = filteredTasks.slice(visibleCount, visibleCount + PAGE_SIZE);
