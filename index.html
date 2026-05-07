@@ -10,9 +10,7 @@
 
 <body>
 
-<!-- --------------------------------------------------
-     TOP BAR (SMALL BUBBLE LOGO)
--------------------------------------------------- -->
+<!-- TOP BAR -->
 <div class="topbar">
   <div class="logo-small-bubble"></div>
   <div class="topbar-title">Taskly</div>
@@ -21,14 +19,9 @@
   </button>
 </div>
 
-<!-- --------------------------------------------------
-     SCREENS (TRUE MOBILE APP NAVIGATION)
--------------------------------------------------- -->
-
 <!-- HOME SCREEN -->
 <div id="screen-home" class="screen active">
 
-  <!-- HERO BUBBLE -->
   <div class="hero-logo-wrapper">
     <div class="hero-bubble"></div>
   </div>
@@ -38,7 +31,31 @@
 
   <!-- SEARCH BAR -->
   <div class="search-bar">
-    <input id="homeLocation" placeholder="Location">
+    <input list="locationList" id="homeLocation" placeholder="Location">
+
+    <datalist id="locationList">
+      <option>Ottawa</option>
+      <option>Toronto</option>
+      <option>Vancouver</option>
+      <option>Montreal</option>
+      <option>Calgary</option>
+      <option>United States</option>
+      <option>Canada</option>
+      <option>Mexico</option>
+      <option>United Kingdom</option>
+      <option>France</option>
+      <option>Germany</option>
+      <option>Australia</option>
+      <option>Japan</option>
+      <option>China</option>
+      <option>Brazil</option>
+      <option>India</option>
+      <option>South Korea</option>
+      <option>Italy</option>
+      <option>Spain</option>
+      <option>Netherlands</option>
+    </datalist>
+
     <select id="homeCategory">
       <option>All Categories</option>
       <option>Yard Work</option>
@@ -46,6 +63,7 @@
       <option>Errands</option>
       <option>Pet Care</option>
     </select>
+
     <button class="btn primary" onclick="navigateTo('search')">Search</button>
   </div>
 
@@ -74,7 +92,7 @@
   <h2>Search Tasks</h2>
   <input id="searchInput" placeholder="Search…" oninput="liveSearch()">
   <p id="searchStatus" class="muted"></p>
-  <div id="searchResults"></div>
+  <div id="searchResults" class="task-grid"></div>
 </div>
 
 <!-- MESSAGES SCREEN -->
@@ -91,9 +109,7 @@
 <!-- HOURS SCREEN -->
 <div id="screen-hours" class="screen">
   <h2>Your Volunteer Hours</h2>
-
   <div id="hoursList"></div>
-
   <button class="btn primary" onclick="exportVolunteerHours()">Export Hours</button>
 </div>
 
@@ -139,9 +155,7 @@
   <p><strong>Time:</strong> <span id="tdTime"></span></p>
 </div>
 
-<!-- --------------------------------------------------
-     BOTTOM NAVIGATION BAR
--------------------------------------------------- -->
+<!-- BOTTOM NAV -->
 <div class="bottom-nav">
   <div onclick="navigateTo('home')">🏠<span>Home</span></div>
   <div onclick="navigateTo('search')">🔍<span>Search</span></div>
