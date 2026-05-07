@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Taskly Mobile App</title>
+  <title>Taskly</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="styles.css">
   <script src="https://unpkg.com/feather-icons"></script>
@@ -10,105 +10,144 @@
 
 <body>
 
-<!-- --------------------------------------------------
-     TOP BAR (SMALL BUBBLE LOGO)
--------------------------------------------------- -->
+<!-- TOP BAR -->
 <div class="topbar">
   <div class="logo-small-bubble"></div>
-  <div class="topbar-title">Taskly</div>
+  <div id="ui_appName" class="topbar-title">Taskly</div>
   <button id="darkToggle" class="btn-icon">
     <i data-feather="moon"></i>
   </button>
 </div>
 
-<!-- --------------------------------------------------
-     SCREENS (TRUE MOBILE APP NAVIGATION)
--------------------------------------------------- -->
-
 <!-- HOME SCREEN -->
 <div id="screen-home" class="screen active">
 
-  <!-- HERO BUBBLE -->
   <div class="hero-logo-wrapper">
     <div class="hero-bubble"></div>
   </div>
 
-  <h2 class="welcome-title">Welcome back!</h2>
-  <p class="welcome-sub">Lend a hand and make a difference today.</p>
+  <h2 id="ui_homeWelcome" class="welcome-title">Welcome back!</h2>
+  <p id="ui_homeSubtitle" class="welcome-sub">Lend a hand and make a difference today.</p>
 
   <!-- SEARCH BAR -->
   <div class="search-bar">
-    <input id="homeLocation" placeholder="Location">
+    <input list="locationList" id="homeLocation" placeholder="Location" onchange="updateLanguageFromLocation()">
+
+    <datalist id="locationList">
+      <!-- Canada -->
+      <option>Ottawa</option>
+      <option>Toronto</option>
+      <option>Montreal</option>
+      <option>Vancouver</option>
+      <option>Calgary</option>
+
+      <!-- USA -->
+      <option>New York</option>
+      <option>Los Angeles</option>
+      <option>Chicago</option>
+      <option>Houston</option>
+
+      <!-- Europe -->
+      <option>Paris</option>
+      <option>Berlin</option>
+      <option>Madrid</option>
+      <option>Rome</option>
+      <option>Amsterdam</option>
+      <option>Stockholm</option>
+      <option>Oslo</option>
+      <option>Copenhagen</option>
+      <option>Helsinki</option>
+
+      <!-- Asia -->
+      <option>Tokyo</option>
+      <option>Seoul</option>
+      <option>Beijing</option>
+      <option>Shanghai</option>
+      <option>Taipei</option>
+      <option>Hong Kong</option>
+      <option>Bangkok</option>
+      <option>New Delhi</option>
+
+      <!-- Latin America -->
+      <option>Mexico City</option>
+      <option>São Paulo</option>
+      <option>Buenos Aires</option>
+
+      <!-- Middle East -->
+      <option>Dubai</option>
+      <option>Riyadh</option>
+      <option>Cairo</option>
+    </datalist>
+
     <select id="homeCategory">
-      <option>All Categories</option>
-      <option>Yard Work</option>
-      <option>Tech Help</option>
-      <option>Errands</option>
-      <option>Pet Care</option>
+      <option id="ui_catAll">All Categories</option>
+      <option id="ui_catYard">Yard Work</option>
+      <option id="ui_catTech">Tech Help</option>
+      <option id="ui_catErrands">Errands</option>
+      <option id="ui_catPet">Pet Care</option>
     </select>
-    <button class="btn primary" onclick="navigateTo('search')">Search</button>
+
+    <button id="ui_searchBtn" class="btn primary" onclick="navigateTo('search')">Search</button>
   </div>
 
   <!-- CATEGORY ICONS -->
   <div class="category-row">
-    <div class="cat-item" onclick="quickCategory('yard')">🌿 Yard Work</div>
-    <div class="cat-item" onclick="quickCategory('tech')">💻 Tech Help</div>
-    <div class="cat-item" onclick="quickCategory('errands')">🛒 Errands</div>
-    <div class="cat-item" onclick="quickCategory('pet')">🐶 Pet Care</div>
+    <div class="cat-item" onclick="quickCategory('yard')" id="ui_catYard2">🌿 Yard Work</div>
+    <div class="cat-item" onclick="quickCategory('tech')" id="ui_catTech2">💻 Tech Help</div>
+    <div class="cat-item" onclick="quickCategory('errands')" id="ui_catErrands2">🛒 Errands</div>
+    <div class="cat-item" onclick="quickCategory('pet')" id="ui_catPet2">🐶 Pet Care</div>
   </div>
 
   <!-- POPULAR TASKS -->
-  <h3 class="section-title">Popular Tasks for You</h3>
+  <h3 id="ui_popularTasks" class="section-title">Popular Tasks for You</h3>
   <div id="homePopular" class="task-grid"></div>
 
   <!-- HOURS BANNER -->
   <div class="hours-banner">
-    <h3>Track Your Volunteer Hours & Earn Rewards!</h3>
-    <p>Build your resume for the future.</p>
-    <button class="btn primary" onclick="navigateTo('hours')">Get Started</button>
+    <h3 id="ui_hoursBannerTitle">Track Your Volunteer Hours & Earn Rewards!</h3>
+    <p id="ui_hoursBannerText">Build your resume for the future.</p>
+    <button id="ui_hoursBannerBtn" class="btn primary" onclick="navigateTo('hours')">Get Started</button>
   </div>
 </div>
 
 <!-- SEARCH SCREEN -->
 <div id="screen-search" class="screen">
-  <h2>Search Tasks</h2>
+  <h2 id="ui_searchTitle">Search Tasks</h2>
   <input id="searchInput" placeholder="Search…" oninput="liveSearch()">
   <p id="searchStatus" class="muted"></p>
-  <div id="searchResults"></div>
+  <div id="searchResults" class="task-grid"></div>
 </div>
 
 <!-- MESSAGES SCREEN -->
 <div id="screen-messages" class="screen">
-  <h2>Messages</h2>
+  <h2 id="ui_messagesTitle">Messages</h2>
   <div id="chat" class="chat-box"></div>
 
   <div class="chat-input-row">
     <input id="chatInput" placeholder="Type a message…">
-    <button class="btn primary" onclick="sendMsg()">Send</button>
+    <button id="ui_sendBtn" class="btn primary" onclick="sendMsg()">Send</button>
   </div>
 </div>
 
 <!-- HOURS SCREEN -->
 <div id="screen-hours" class="screen">
-  <h2>Your Volunteer Hours</h2>
-
+  <h2 id="ui_hoursTitle">Your Volunteer Hours</h2>
   <div id="hoursList"></div>
-
-  <button class="btn primary" onclick="exportVolunteerHours()">Export Hours</button>
+  <button id="ui_exportHoursBtn" class="btn primary" onclick="exportVolunteerHours()">Export Hours</button>
 </div>
 
 <!-- PROFILE SCREEN -->
 <div id="screen-profile" class="screen">
-  <h2>Your Profile</h2>
+  <h2 id="ui_profileTitle">Your Profile</h2>
 
   <div id="profilePfp" class="pfp"></div>
 
-  <p><strong>Email:</strong> <span id="pEmail"></span></p>
-  <p><strong>Name:</strong> <span id="pName"></span></p>
-  <p><strong>Role:</strong> <span id="pRole"></span></p>
+  <p><strong id="ui_emailLabel">Email:</strong> <span id="pEmail"></span></p>
+  <p><strong id="ui_nameLabel">Name:</strong> <span id="pName"></span></p>
+  <p><strong id="ui_roleLabel">Role:</strong> <span id="pRole"></span></p>
   <p id="pRank" class="muted"></p>
 
-  <h3>Edit Profile</h3>
+  <h3 id="ui_editProfileTitle">Edit Profile</h3>
   <input id="setEmail" placeholder="Email">
   <input id="peName" placeholder="Name">
   <select id="peRole">
@@ -117,37 +156,36 @@
   </select>
 
   <label class="checkbox-row">
-    <input type="checkbox" id="peVerified"> Verified
+    <input type="checkbox" id="peVerified">
+    <span id="ui_verifiedLabel">Verified</span>
   </label>
 
-  <button class="btn primary" onclick="saveSettings()">Save</button>
+  <button id="ui_saveBtn" class="btn primary" onclick="saveSettings()">Save</button>
 </div>
 
 <!-- TASK DETAILS SCREEN -->
 <div id="screen-task" class="screen">
-  <button class="btn secondary" onclick="navigateBack()">Back</button>
+  <button id="ui_backBtn" class="btn secondary" onclick="navigateBack()">Back</button>
 
   <img id="tdImg" class="task-img">
 
   <h2 id="tdTitle"></h2>
   <p id="tdDesc"></p>
 
-  <p><strong>Pay:</strong> <span id="tdPay"></span></p>
-  <p><strong>Senior:</strong> <span id="tdSenior"></span></p>
-  <p><strong>Category:</strong> <span id="tdCat"></span></p>
-  <p><strong>Difficulty:</strong> <span id="tdDiff"></span></p>
-  <p><strong>Time:</strong> <span id="tdTime"></span></p>
+  <p><strong id="ui_payLabel">Pay:</strong> <span id="tdPay"></span></p>
+  <p><strong id="ui_seniorLabel">Senior:</strong> <span id="tdSenior"></span></p>
+  <p><strong id="ui_categoryLabel">Category:</strong> <span id="tdCat"></span></p>
+  <p><strong id="ui_difficultyLabel">Difficulty:</strong> <span id="tdDiff"></span></p>
+  <p><strong id="ui_timeLabel">Time:</strong> <span id="tdTime"></span></p>
 </div>
 
-<!-- --------------------------------------------------
-     BOTTOM NAVIGATION BAR
--------------------------------------------------- -->
+<!-- BOTTOM NAV -->
 <div class="bottom-nav">
-  <div onclick="navigateTo('home')">🏠<span>Home</span></div>
-  <div onclick="navigateTo('search')">🔍<span>Search</span></div>
-  <div onclick="navigateTo('messages')">💬<span>Messages</span></div>
-  <div onclick="navigateTo('hours')">⏱️<span>Hours</span></div>
-  <div onclick="navigateTo('profile')">👤<span>Profile</span></div>
+  <div onclick="navigateTo('home')">🏠<span id="ui_navHome">Home</span></div>
+  <div onclick="navigateTo('search')">🔍<span id="ui_navSearch">Search</span></div>
+  <div onclick="navigateTo('messages')">💬<span id="ui_navMessages">Messages</span></div>
+  <div onclick="navigateTo('hours')">⏱️<span id="ui_navHours">Hours</span></div>
+  <div onclick="navigateTo('profile')">👤<span id="ui_navProfile">Profile</span></div>
 </div>
 
 <script src="script.js"></script>
