@@ -1,4 +1,6 @@
-/* GLOBAL STATE */
+/* =========================
+   GLOBAL STATE
+========================= */
 let currentScreen = "onboarding";
 let screenHistory = ["onboarding"];
 let currentLanguage = "en";
@@ -25,7 +27,9 @@ let volunteerHistory = [
   { title: "Fixed Wi-Fi for Mr. Lee", hours: 1 }
 ];
 
-/* LANGUAGE PACK (simplified) */
+/* =========================
+   LANGUAGE + REGION
+========================= */
 const LANG = {
   en: {
     appName: "Taskly",
@@ -76,8 +80,7 @@ const LANG = {
   }
 };
 
-/* LOCATION → LANGUAGE MAP */
-const LOCATION_LANG = {
+const REGION_TO_LANG = {
   "Ottawa": "en",
   "Toronto": "en",
   "Montreal": "en",
@@ -112,10 +115,9 @@ const LOCATION_LANG = {
   "Cairo": "en"
 };
 
-/* APPLY LANGUAGE */
 function applyLanguage(lang) {
   currentLanguage = lang;
-  const L = LANG[lang] || LANG["en"];
+  const L = LANG[lang] || LANG.en;
 
   const map = {
     ui_appName: L.appName,
@@ -175,15 +177,22 @@ function applyLanguage(lang) {
   }
 }
 
-/* LOCATION → LANGUAGE SWITCH */
-function updateLanguageFromLocation() {
-  const loc = document.getElementById("homeLocation").value;
-  const lang = LOCATION_LANG[loc] || "en";
+function updateLanguageFromRegion(region) {
+  const lang = REGION_TO_LANG[region] || "en";
   applyLanguage(lang);
+}
+
+function updateLanguageFromLocation() {
+  const input = document.getElementById("homeLocation");
+  if (!input) return;
+  const region = input.value.trim();
+  updateLanguageFromRegion(region);
 }
 window.updateLanguageFromLocation = updateLanguageFromLocation;
 
-/* NAVIGATION */
+/* =========================
+   NAVIGATION
+========================= */
 function showScreen(id) {
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
   const el = document.getElementById("screen-" + id);
@@ -224,7 +233,9 @@ function navigateBack() {
 window.navigateTo = navigateTo;
 window.navigateBack = navigateBack;
 
-/* ONBOARDING */
+/* =========================
+   ONBOARDING
+========================= */
 function completeOnboarding() {
   const name = document.getElementById("obName").value.trim();
   const username = document.getElementById("obUsername").value.trim();
@@ -251,15 +262,25 @@ function completeOnboarding() {
   navigateTo("home");
   loadHomePopular();
 }
+window.completeOnboarding = completeOnboarding;
 
-/* DARK MODE */
-document.getElementById("darkToggle").onclick = () => {
-  document.body.classList.toggle("dark");
-  const icon = document.getElementById("darkIcon");
-  icon.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
-};
+/* =========================
+   DARK MODE
+========================= */
+const darkToggleBtn = document.getElementById("darkToggle");
+if (darkToggleBtn) {
+  darkToggleBtn.onclick = () => {
+    document.body.classList.toggle("dark");
+    const icon = document.getElementById("darkIcon");
+    if (icon) {
+      icon.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
+    }
+  };
+}
 
-/* TASK GENERATION */
+/* =========================
+   TASKS + IMAGES
+========================= */
 const categories = {
   yard: { label: "Yard Work" },
   tech: { label: "Tech Help" },
@@ -335,7 +356,9 @@ function loadHomePopular() {
   container.innerHTML = popular.map(taskCardHTML).join("");
 }
 
-/* FUZZY SEARCH (LEVENSHTEIN) */
+/* =========================
+   SEARCH + FUZZY MATCH
+========================= */
 function levenshtein(a, b) {
   const matrix = Array.from({ length: a.length + 1 }, () => []);
   for (let i = 0; i <= a.length; i++) matrix[i][0] = i;
@@ -354,7 +377,6 @@ function levenshtein(a, b) {
   return matrix[a.length][b.length];
 }
 
-/* SEARCH */
 function initSearch() {
   if (!allTasks.length) allTasks = generateTasks(200);
 
@@ -422,7 +444,6 @@ function updateSearchStatus() {
   status.textContent = `Showing ${visibleCount} of ${filteredTasks.length} tasks`;
 }
 
-/* TASK CARD HTML */
 function taskCardHTML(t) {
   return `
     <div class="task-card">
@@ -440,7 +461,9 @@ function taskCardHTML(t) {
   `;
 }
 
-/* OPEN TASK DETAILS */
+/* =========================
+   TASK DETAILS
+========================= */
 function openTask(id) {
   currentTask = allTasks.find(t => t.id === id);
   if (!currentTask) return;
@@ -454,22 +477,26 @@ function openTask(id) {
   const diff = document.getElementById("tdDiff");
   const time = document.getElementById("tdTime");
 
-  img.classList.remove("loaded");
-  img.src = currentTask.image;
+  if (img) {
+    img.classList.remove("loaded");
+    img.src = currentTask.image;
+  }
 
-  title.textContent = currentTask.title;
-  desc.textContent = currentTask.desc;
-  pay.textContent = currentTask.pay;
-  senior.textContent = currentTask.senior;
-  cat.textContent = currentTask.categoryLabel;
-  diff.textContent = currentTask.difficulty;
-  time.textContent = currentTask.time;
+  if (title) title.textContent = currentTask.title;
+  if (desc) desc.textContent = currentTask.desc;
+  if (pay) pay.textContent = currentTask.pay;
+  if (senior) senior.textContent = currentTask.senior;
+  if (cat) cat.textContent = currentTask.categoryLabel;
+  if (diff) diff.textContent = currentTask.difficulty;
+  if (time) time.textContent = currentTask.time;
 
   navigateTo("task");
 }
 window.openTask = openTask;
 
-/* MESSAGES */
+/* =========================
+   MESSAGES
+========================= */
 function sendMsg() {
   const input = document.getElementById("chatInput");
   if (!input) return;
@@ -519,7 +546,9 @@ function generateReply(text) {
   return "Thank you dear, that’s very kind of you.";
 }
 
-/* HOURS */
+/* =========================
+   HOURS
+========================= */
 function renderHours() {
   const list = document.getElementById("hoursList");
   if (!list) return;
@@ -534,7 +563,9 @@ function exportVolunteerHours() {
 }
 window.exportVolunteerHours = exportVolunteerHours;
 
-/* PROFILE */
+/* =========================
+   PROFILE
+========================= */
 function loadProfile() {
   const pEmail = document.getElementById("pEmail");
   const pName = document.getElementById("pName");
@@ -586,7 +617,9 @@ function saveSettings() {
 }
 window.saveSettings = saveSettings;
 
-/* QUICK CATEGORY SEARCH */
+/* =========================
+   QUICK CATEGORY
+========================= */
 function quickCategory(cat) {
   navigateTo("search");
   const input = document.getElementById("searchInput");
@@ -600,20 +633,14 @@ function quickCategory(cat) {
 }
 window.quickCategory = quickCategory;
 
-/* INIT */
-window.onload = () => {
-  allTasks = generateTasks(200);
-  applyLanguage(currentLanguage);
-  showScreen("onboarding");
-  document.getElementById("bottomNav").classList.add("hidden");
-};
+/* =========================
+   GEOLOCATION + LANGUAGE
+========================= */
 function autoDetectCountry() {
   if (!navigator.geolocation) return;
 
   navigator.geolocation.getCurrentPosition(async (pos) => {
     const { latitude, longitude } = pos.coords;
-
-    // Reverse geocode using OpenStreetMap (free)
     const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`;
 
     try {
@@ -621,10 +648,11 @@ function autoDetectCountry() {
       const data = await res.json();
 
       const country = data.address.country || "Unknown";
-      const countryInput = document.getElementById("homeLocation");
+      const input = document.getElementById("homeLocation");
 
-      if (countryInput) {
-        countryInput.value = country;
+      if (input) {
+        input.value = country;
+        updateLanguageFromRegion(country);
       }
     } catch (err) {
       console.log("Geolocation lookup failed", err);
@@ -632,5 +660,21 @@ function autoDetectCountry() {
   });
 }
 
-// Run on startup
-autoDetectCountry();
+/* =========================
+   INIT
+========================= */
+window.onload = () => {
+  allTasks = generateTasks(200);
+  applyLanguage(currentLanguage);
+  showScreen("onboarding");
+
+  const nav = document.getElementById("bottomNav");
+  if (nav) nav.classList.add("hidden");
+
+  const homeLocation = document.getElementById("homeLocation");
+  if (homeLocation) {
+    homeLocation.addEventListener("change", updateLanguageFromLocation);
+  }
+
+  autoDetectCountry();
+};
