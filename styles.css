@@ -5,12 +5,17 @@
   box-sizing: border-box;
 }
 
+/* BASE BODY + COLORFUL BACKGROUND */
 body {
   font-family: system-ui, sans-serif;
-  background: #f5f6ff;
   color: #222;
   padding-bottom: 80px;
   overflow-x: hidden;
+  min-height: 100vh;
+
+  /* Soft colorful gradient */
+  background: radial-gradient(circle at top left, #e8d4ff 0%, #d7e0ff 40%, #c9f3ff 100%);
+  position: relative;
 }
 
 .hidden {
@@ -407,7 +412,7 @@ input, select {
 
 /* DARK MODE */
 body.dark {
-  background: #0f1018;
+  background: radial-gradient(circle at top left, #05060b 0%, #101322 40%, #05060b 100%);
   color: #f5f5f5;
 }
 
@@ -452,15 +457,21 @@ body.dark .nav-icon {
 body.dark .nav-item span {
   color: #ddd;
 }
-/* === BACKGROUND EFFECTS (James Edition) === */
 
-/* Soft gradient base */
-body {
-  background: radial-gradient(circle at top left, #e8d4ff 0%, #d7e0ff 40%, #c9f3ff 100%);
-  min-height: 100vh;
-  position: relative;
-  overflow-x: hidden;
+/* DARK MODE TWEAKS FOR BACKGROUND LAYERS */
+body.dark .bg-blob {
+  opacity: 0.35;
 }
+
+body.dark .bg-dots {
+  opacity: 0.25;
+}
+
+body.dark .bg-vignette {
+  opacity: 0.6;
+}
+
+/* === BACKGROUND EFFECTS === */
 
 /* Floating blobs */
 .bg-blob {
