@@ -5,7 +5,6 @@
   <title>Taskly</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="styles.css">
-  <script src="https://unpkg.com/feather-icons"></script>
 </head>
 
 <body>
@@ -15,13 +14,39 @@
   <div class="logo-small-bubble"></div>
   <div id="ui_appName" class="topbar-title">Taskly</div>
   <button id="darkToggle" class="btn-icon">
-    <i data-feather="moon"></i>
+    <span id="darkIcon">🌙</span>
   </button>
 </div>
 
-<!-- HOME SCREEN -->
-<div id="screen-home" class="screen active">
+<!-- ONBOARDING / SIGNUP -->
+<div id="screen-onboarding" class="screen active">
+  <div class="onboard-hero"></div>
 
+  <h2 id="ui_onboardTitle">Welcome to Taskly</h2>
+  <p id="ui_onboardSubtitle" class="muted">Set up your account to get started.</p>
+
+  <div class="onboard-card">
+    <label id="ui_onboardNameLabel">Full name</label>
+    <input id="obName" placeholder="Your name">
+
+    <label id="ui_onboardUsernameLabel">Username</label>
+    <input id="obUsername" placeholder="Username (what others see)">
+
+    <label id="ui_onboardEmailLabel">Email</label>
+    <input id="obEmail" placeholder="Email">
+
+    <label id="ui_onboardRoleLabel">Role</label>
+    <select id="obRole">
+      <option value="helper">Helper</option>
+      <option value="senior">Senior</option>
+    </select>
+
+    <button id="ui_onboardBtn" class="btn primary" onclick="completeOnboarding()">Continue</button>
+  </div>
+</div>
+
+<!-- HOME SCREEN -->
+<div id="screen-home" class="screen">
   <div class="hero-logo-wrapper">
     <div class="hero-bubble"></div>
   </div>
@@ -34,20 +59,15 @@
     <input list="locationList" id="homeLocation" placeholder="Location" onchange="updateLanguageFromLocation()">
 
     <datalist id="locationList">
-      <!-- Canada -->
       <option>Ottawa</option>
       <option>Toronto</option>
       <option>Montreal</option>
       <option>Vancouver</option>
       <option>Calgary</option>
-
-      <!-- USA -->
       <option>New York</option>
       <option>Los Angeles</option>
       <option>Chicago</option>
       <option>Houston</option>
-
-      <!-- Europe -->
       <option>Paris</option>
       <option>Berlin</option>
       <option>Madrid</option>
@@ -57,8 +77,6 @@
       <option>Oslo</option>
       <option>Copenhagen</option>
       <option>Helsinki</option>
-
-      <!-- Asia -->
       <option>Tokyo</option>
       <option>Seoul</option>
       <option>Beijing</option>
@@ -67,13 +85,9 @@
       <option>Hong Kong</option>
       <option>Bangkok</option>
       <option>New Delhi</option>
-
-      <!-- Latin America -->
       <option>Mexico City</option>
       <option>São Paulo</option>
       <option>Buenos Aires</option>
-
-      <!-- Middle East -->
       <option>Dubai</option>
       <option>Riyadh</option>
       <option>Cairo</option>
@@ -142,14 +156,17 @@
 
   <div id="profilePfp" class="pfp"></div>
 
-  <p><strong id="ui_emailLabel">Email:</strong> <span id="pEmail"></span></p>
   <p><strong id="ui_nameLabel">Name:</strong> <span id="pName"></span></p>
+  <p><strong id="ui_usernameLabel">Username:</strong> <span id="pUsername"></span></p>
+  <p><strong id="ui_emailLabel">Email:</strong> <span id="pEmail"></span></p>
   <p><strong id="ui_roleLabel">Role:</strong> <span id="pRole"></span></p>
+  <p><strong id="ui_verifiedLabel">Verified:</strong> <span id="pVerified"></span></p>
   <p id="pRank" class="muted"></p>
 
   <h3 id="ui_editProfileTitle">Edit Profile</h3>
-  <input id="setEmail" placeholder="Email">
   <input id="peName" placeholder="Name">
+  <input id="peUsername" placeholder="Username">
+  <input id="setEmail" placeholder="Email">
   <select id="peRole">
     <option value="helper">Helper</option>
     <option value="senior">Senior</option>
@@ -157,7 +174,7 @@
 
   <label class="checkbox-row">
     <input type="checkbox" id="peVerified">
-    <span id="ui_verifiedLabel">Verified</span>
+    <span id="ui_verifiedToggleLabel">Verified account</span>
   </label>
 
   <button id="ui_saveBtn" class="btn primary" onclick="saveSettings()">Save</button>
@@ -167,7 +184,10 @@
 <div id="screen-task" class="screen">
   <button id="ui_backBtn" class="btn secondary" onclick="navigateBack()">Back</button>
 
-  <img id="tdImg" class="task-img">
+  <div class="img-wrapper">
+    <div class="shimmer"></div>
+    <img id="tdImg" class="task-img" onload="this.classList.add('loaded')">
+  </div>
 
   <h2 id="tdTitle"></h2>
   <p id="tdDesc"></p>
@@ -180,12 +200,41 @@
 </div>
 
 <!-- BOTTOM NAV -->
-<div class="bottom-nav">
-  <div onclick="navigateTo('home')">🏠<span id="ui_navHome">Home</span></div>
-  <div onclick="navigateTo('search')">🔍<span id="ui_navSearch">Search</span></div>
-  <div onclick="navigateTo('messages')">💬<span id="ui_navMessages">Messages</span></div>
-  <div onclick="navigateTo('hours')">⏱️<span id="ui_navHours">Hours</span></div>
-  <div onclick="navigateTo('profile')">👤<span id="ui_navProfile">Profile</span></div>
+<div id="bottomNav" class="bottom-nav hidden">
+  <div class="nav-item" onclick="navigateTo('home')">
+    <svg class="nav-icon" viewBox="0 0 24 24">
+      <path d="M3 9.5L12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5z"/>
+    </svg>
+    <span id="ui_navHome">Home</span>
+  </div>
+
+  <div class="nav-item" onclick="navigateTo('search')">
+    <svg class="nav-icon" viewBox="0 0 24 24">
+      <path d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm11 20-6-6"/>
+    </svg>
+    <span id="ui_navSearch">Search</span>
+  </div>
+
+  <div class="nav-item" onclick="navigateTo('messages')">
+    <svg class="nav-icon" viewBox="0 0 24 24">
+      <path d="M4 4h16v12H7l-3 3V4z"/>
+    </svg>
+    <span id="ui_navMessages">Messages</span>
+  </div>
+
+  <div class="nav-item" onclick="navigateTo('hours')">
+    <svg class="nav-icon" viewBox="0 0 24 24">
+      <path d="M12 1a11 11 0 1 1 0 22 11 11 0 0 1 0-22zm0 5v6l4 2"/>
+    </svg>
+    <span id="ui_navHours">Hours</span>
+  </div>
+
+  <div class="nav-item" onclick="navigateTo('profile')">
+    <svg class="nav-icon" viewBox="0 0 24 24">
+      <path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-4 0-8 2-8 5v2h16v-2c0-3-4-5-8-5z"/>
+    </svg>
+    <span id="ui_navProfile">Profile</span>
+  </div>
 </div>
 
 <script src="script.js"></script>
